@@ -45,7 +45,7 @@ dependencies = [
 [project.urls]
 Documentation = "https://github.com/Anderson R Damasceno/finanbot#readme"
 Issues = "https://github.com/Anderson R Damasceno/finanbot/issues"
-Source = "https://github.com/Anderson R Damasceno/finanbot"
+Source = "git remote add origin https://github.com/anderdam/finanbot.git"
 
 [tool.hatch.version]
 path = "src/finanbot/__about__.py"

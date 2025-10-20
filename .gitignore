@@ -1,0 +1,94 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+*.pyd
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+wheels/
+
+# Hatch / virtual environments / local Python config
+.venv/
+venv/
+ENV/
+env/
+.env
+.env.*
+.python-version
+__pypackages__/
+.hatch/
+.hatchling/
+
+# Editor / IDE
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test, type-check and lint caches / outputs
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.mypy_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+
+# Logs and temp files
+*.log
+*.tmp
+*.bak
+*.orig
+
+# Streamlit
+.streamlit/
+
+# Databases
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+
+# Jupyter
+.ipynb_checkpoints
+*.ipynb
+
+# Sphinx / docs
+docs/_build/
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Security / credentials
+local_settings.py
+secrets/
+credentials/
+*.pem
+*.key
+
+# Test reports
+coverage.xml
+nosetests.xml
+test-results/
+
+# Misc
+*.pyc
+pip-log.txt
