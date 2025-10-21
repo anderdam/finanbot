@@ -5,7 +5,7 @@ from uuid import UUID
 
 from fastapi import UploadFile
 
-from app.core.config import get_settings
+from src.finanbot.core.config import get_settings
 
 settings = get_settings()
 ATTACHMENTS_DIR = Path(settings.ATTACHMENTS_DIR)

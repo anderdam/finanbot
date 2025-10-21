@@ -4,8 +4,8 @@ from uuid import UUID
 from sqlalchemy import delete, insert, select, update
 from sqlalchemy.orm import Session
 
-from app.models.orm_models import Transaction as TransactionModel
-from app.models.schemas import TransactionCreate
+from src.finanbot.models.orm_models import Transaction as TransactionModel
+from src.finanbot.models.schemas import TransactionCreate
 
 
 def create_transaction(

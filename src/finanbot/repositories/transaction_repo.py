@@ -1,14 +1,18 @@
 """
-This file acts as a bridge between your API layer and the raw database operations in crud.py. It’s where you implement business logic, validation, and orchestration that goes beyond simple CRUD
+This file acts as a bridge between your API layer and the raw database
+operations in crud.py.
+It’s where you implement business logic, validation, and orchestration that goes beyond
+simple CRUD
 """
 
 from uuid import UUID
-from sqlalchemy.orm import Session
-from fastapi import UploadFile
 
-from app.db import crud
-from app.models.schemas import TransactionCreate, TransactionUpdate
-from app.attachments import storage
+from fastapi import UploadFile
+from sqlalchemy.orm import Session
+
+from src.finanbot.attachments import storage
+from src.finanbot.db import crud
+from src.finanbot.models.schemas import TransactionCreate, TransactionUpdate
 
 
 def create_transaction_with_attachment(

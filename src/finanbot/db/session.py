@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session as SessionType
 from sqlalchemy.orm import sessionmaker
 
-from app.core.config import get_settings
+from src.finanbot.core.config import get_settings
 
 engine = create_engine(
     get_settings().database_url, future=True, echo=False, pool_pre_ping=True

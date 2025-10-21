@@ -57,7 +57,9 @@ class PostgresUtils:
     def save_dataframe(self, df: pd.DataFrame, table_name: str):
         try:
             with self.engine.connect() as connection:
-                df.to_sql(table_name, connection, if_exists="append", index=False)
+                df.to_sql(
+                    table_name, connection, if_exists="src.finanbotend", index=False
+                )
             logging.info(
                 f"✅ Dados salvos na tabela '{table_name}' no schema '{self.schema}'."
             )
@@ -109,7 +111,7 @@ class PostgresUtils:
 
 
 if __name__ == "__main__":
-    from app.core.config import get_settings
+    from src.finanbot.core.config import get_settings
 
     settings = get_settings()
 

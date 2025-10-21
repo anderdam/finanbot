@@ -1,4 +1,4 @@
-"""Entry point for the application.
+"""Entry point for the src.finanbotlication.
 
 Initializes a `PostgresUtils` client from settings, ensures the
 `finance-tracker` schema exists, and logs available schemas and tables.
@@ -7,11 +7,13 @@ Initializes a `PostgresUtils` client from settings, ensures the
 import logging
 import sys
 
-from app.core.config import get_settings
-from app.utils.postgres import PostgresUtils
+from src.finanbot.core.config import get_settings
+from src.finanbot.utils.postgres import PostgresUtils
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
+)
 
 
 def main() -> None:
@@ -24,7 +26,8 @@ def main() -> None:
       - `create_schema_if_not_exists("finance-tracker")`
       - `list_schemas()`
       - `list_tables("finance-tracker")`
-    - Logs results and attempts to gracefully close the DB client if it exposes a `close()` method.
+    - Logs results and attempts to gracefully close the DB client if it exposes
+    a `close()` method.
     """
     settings = get_settings()
 
@@ -62,5 +65,5 @@ if __name__ == "__main__":
     try:
         main()
     except Exception:
-        logger.exception("Application terminated with an error")
+        logger.exception("src.finanbotlication terminated with an error")
         sys.exit(1)
