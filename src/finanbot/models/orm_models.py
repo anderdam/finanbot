@@ -34,10 +34,10 @@ class TransactionType(str, Enum):
 class User(Base):
     __tablename__ = "users"
 
-    id: Mapped[UUID] = mapped_column(primary_key=True)
-    username: Mapped[str] = mapped_column(String(50), nullable=False)
-    email: Mapped[str] = mapped_column(String(150), nullable=False, unique=True)
-    display_name: Mapped[str] = mapped_column(String(50), nullable=True)
+    id: Mapped[UUID] = mapped_column("users_id", primary_key=True)
+    username: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
+    email: Mapped[str] = mapped_column(String(150), nullable=True, unique=True)
+    display_name: Mapped[str | None] = mapped_column(String(50), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
@@ -63,12 +63,14 @@ class Account(Base):
     __tablename__ = "accounts"
     __table_args__ = (UniqueConstraint("user_id", "name", name="uq_user_account_name"),)
 
-    id: Mapped[UUID] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column("accounts_id", primary_key=True)
     user_id: Mapped[UUID] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+        ForeignKey("finances.users.users_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
-    name: Mapped[str] = mapped_column(String(50), nullable=False)
-    type: Mapped[str] = mapped_column(String(50), nullable=False)
+    name: Mapped[str] = mapped_column("acc_name", String(50), nullable=False)
+    type: Mapped[str] = mapped_column("acc_type", String(50), nullable=False)
     currency: Mapped[str] = mapped_column(CHAR(3), nullable=False, default="BRL")
     balance: Mapped[float] = mapped_column(Numeric(18, 2), nullable=False, default=0)
     details: Mapped[dict[str, object]] = mapped_column(
@@ -88,14 +90,15 @@ class Account(Base):
 class Category(Base):
     __tablename__ = "categories"
 
-    id: Mapped[UUID] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column("categories_id", primary_key=True)
     user_id: Mapped[UUID] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"), index=True
+        ForeignKey("finances.users.users_id", ondelete="CASCADE"), index=True
     )
-    name: Mapped[str] = mapped_column(String(50), nullable=False)
+    name: Mapped[str] = mapped_column("cat_name", String(50), nullable=False)
     kind: Mapped[str] = mapped_column(String(50), nullable=False)  # expense or income
     parent_id: Mapped[UUID | None] = mapped_column(
-        ForeignKey("categories.id", ondelete="SET NULL"), nullable=True
+        ForeignKey("finances.categories.categories_id", ondelete="SET NULL"),
+        nullable=True,
     )
     color: Mapped[str | None] = mapped_column(String(10), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
@@ -115,22 +118,27 @@ class Category(Base):
 class Transaction(Base):
     __tablename__ = "transactions"
 
-    id: Mapped[UUID] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column("transactions_id", primary_key=True)
     user_id: Mapped[UUID] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+        ForeignKey("finances.users.users_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     account_id: Mapped[UUID] = mapped_column(
-        ForeignKey("accounts.id", ondelete="RESTRICT"), nullable=False, index=True
+        ForeignKey("finances.accounts.accounts_id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
     )
     category_id: Mapped[UUID | None] = mapped_column(
-        ForeignKey("categories.id", ondelete="SET NULL"), nullable=True
+        ForeignKey("finances.categories.categories_id", ondelete="SET NULL"),
+        nullable=True,
     )
     occurred_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, index=True
     )
     amount: Mapped[float] = mapped_column(Numeric(18, 2), nullable=False)
     currency: Mapped[str] = mapped_column(CHAR(3), nullable=False, default="USD")
-    type: Mapped[TransactionType] = mapped_column(Text, nullable=False)
+    type: Mapped[TransactionType] = mapped_column("tra_type", Text, nullable=False)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     attachment_path: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
@@ -151,12 +159,14 @@ class Transaction(Base):
 class Setting(Base):
     __tablename__ = "settings"
 
-    id: Mapped[UUID] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column("settings_id", primary_key=True)
     user_id: Mapped[UUID] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+        ForeignKey("finances.users.users_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
-    key: Mapped[str] = mapped_column(Text, nullable=False)
-    value: Mapped[dict[str, object]] = mapped_column(JSON, nullable=False)
+    key: Mapped[str] = mapped_column("set_key", Text, nullable=False)
+    value: Mapped[dict[str, object]] = mapped_column("set_value", JSON, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
