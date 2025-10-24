@@ -1,9 +1,9 @@
-import subprocess
 import shutil
+import subprocess
 from datetime import datetime
 from pathlib import Path
 
-from app.core.config import get_settings
+from src.finanbot.core.config import get_settings
 
 settings = get_settings()
 
@@ -15,12 +15,18 @@ def backup_database() -> Path:
 
     cmd = [
         "pg_dump",
-        "-h", settings.postgres_host,
-        "-p", settings.postgres_port,
-        "-U", settings.postgres_user,
-        "-d", settings.postgres_db,
-        "-n", settings.schema,
-        "-f", str(backup_path),
+        "-h",
+        settings.postgres_host,
+        "-p",
+        settings.postgres_port,
+        "-U",
+        settings.postgres_user,
+        "-d",
+        settings.postgres_db,
+        "-n",
+        settings.schema,
+        "-f",
+        str(backup_path),
     ]
 
     env = {"PGPASSWORD": settings.postgres_password}

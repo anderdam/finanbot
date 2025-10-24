@@ -5,9 +5,9 @@ build-backend = "hatchling.build"
 [project]
 name = "finanbot"
 dynamic = ["version"]
-description = 'Personal finance tracker with FastAPI and Streamlit and some bot help'
+description = "Personal finance tracker with FastAPI and Streamlit and some bot help"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 license = "MIT"
 keywords = []
 authors = [
@@ -15,68 +15,85 @@ authors = [
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
-  "Programming Language :: Python",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
+
 dependencies = [
 	"alembic>=1.17.0",
-    "asyncpg>=0.30.0",
-    "fastapi>=0.119.0",
-    "pandas>=2.3.3",
-    "psycopg2-binary>=2.9.11",
-    "pydantic>=2.12.2",
-    "pydantic-settings>=2.11.0",
-    "python-dotenv>=1.1.1",
-    "requests>=2.32.5",
-    "richer>=0.1.6",
-    "sqlalchemy>=2.0.44",
-    "streamlit>=1.50.0",
-    "uvicorn>=0.37.0"
-
+	"asyncpg>=0.30.0",
+	"fastapi>=0.119.0",
+	"pandas>=2.3.3",
+	"psycopg2-binary>=2.9.11",
+	"pydantic>=2.12.2",
+	"pydantic-settings>=2.11.0",
+	"python-dotenv>=1.1.1",
+	"requests>=2.32.5",
+	"richer>=0.1.6",
+	"sqlalchemy>=2.0.44",
+	"streamlit>=1.50.0",
+	"uvicorn>=0.37.0",
+	"mypy>=1.18.2",
+	"bandit>=1.8.6",
+	"black>=25.9.0",
+	"httpx>=0.28.1",
+	"isort>=7.0.0",
+	"pre-commit>=4.3.0",
+	"pytest>=8.4.2",
+	"pytest-asyncio>=1.2.0",
+	"ruff>=0.14.0",
+	"python-jose>=3.5.0",
+	"passlib>=1.7.4",
+	"commitizen>=4.9.1"
 ]
 
 [project.urls]
-Documentation = "https://github.com/Anderson R Damasceno/finanbot#readme"
-Issues = "https://github.com/Anderson R Damasceno/finanbot/issues"
-Source = "git remote add origin https://github.com/anderdam/finanbot.git"
+Documentation = "https://github.com/anderdam/finanbot#readme"
+Issues = "https://github.com/anderdam/finanbot/issues"
+Source = "https://github.com/anderdam/finanbot"
 
 [tool.hatch.version]
 path = "src/finanbot/__about__.py"
 
-[tool.hatch.envs.types]
-extra-dependencies = [
-    "mypy>=1.18.2",
-    "bandit>=1.8.6",
-    "black>=25.9.0",
-    "httpx>=0.28.1",
-    "isort>=7.0.0", 
-    "pre-commit>=4.3.0",
-    "pytest>=8.4.2",
-    "pytest-asyncio>=1.2.0",
-    "ruff>=0.14.0"
-]
-
-[tool.hatch.envs.types.scripts]
-check = "mypy --install-types --non-interactive {args:src/finanbot tests}"
+[tool.hatch.envs.dev.scripts]
+precheck = "pre-commit run --all-files"
+start = "uvicorn finanbot.main:app --reload"
+ui = "streamlit run ui/streamlit_app.py"
+lint = "ruff src tests"
+format = "black src tests"
+typecheck = "mypy src tests"
+test = "pytest"
 
 [tool.coverage.run]
 source_pkgs = ["finanbot", "tests"]
 branch = true
 parallel = true
-omit = [
-  "src/finanbot/__about__.py",
-]
+omit = ["src/finanbot/__about__.py"]
 
 [tool.coverage.paths]
 finanbot = ["src/finanbot", "*/finanbot/src/finanbot"]
 tests = ["tests", "*/finanbot/tests"]
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.1.0"
+tag_format = "v$version"
+
+[tool.black]
+line-length = 88
+target-version = ["py313"]
+
+[tool.ruff]
+line-length = 88
+lint.select = ["E", "F", "B"]
+exclude = ["tests"]
+target-version = "py313"
+
+[tool.isort]
+profile = "black"
 
 [tool.coverage.report]
 exclude_lines = [
@@ -85,7 +102,26 @@ exclude_lines = [
   "if TYPE_CHECKING:",
 ]
 
-[tool.hatch.envs.dev.scripts]
-start = "uvicorn src.main:app --reload"
-ui = "streamlit run ui/streamlit_app.py"
+[tool.pyright]
+include = ["src"]
+exclude = [
+  "**/node_modules",
+  "**/__pycache__",
+  "src/experimental",
+  "src/typestubs"
+]
+ignore = ["src/oldstuff"]
+defineConstant = { DEBUG = true }
+stubPath = "src/stubs"
 
+reportMissingImports = "error"
+reportMissingTypeStubs = false
+
+pythonVersion = "3.13"
+pythonPlatform = "Windows"
+
+executionEnvironments = [
+  { root = "src/finanbot", pythonVersion = "3.13", pythonPlatform = "Windows", extraPaths = [ "src/service_libs" ], reportMissingImports = "warning" },
+  { root = "tests", extraPaths = ["tests/"]},
+  { root = "src" }
+]

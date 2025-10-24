@@ -109,7 +109,7 @@ class PostgresUtils:
 
 
 if __name__ == "__main__":
-    from app.core.config import get_settings
+    from src.finanbot.core.config import get_settings
 
     settings = get_settings()
 
@@ -119,7 +119,7 @@ if __name__ == "__main__":
         user=settings.postgres_user,
         password=settings.postgres_password,
         database=settings.postgres_db,
-        schema="finance-tracker",  # or settings.schema if you add it
+        schema="finance",  # or settings.schema if you add it
     )
 
     db.test_connection()

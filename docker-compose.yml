@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.UTF-8"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./src/finanbot/db:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"
+
+  finanbot:
+    build:
+      context: .
+      dockerfile: src/finanbot/Dockerfile
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DB}"
+      APP_ENV: "development"
+      ATTACHMENTS_DIR: "/data/attachments"
+    volumes:
+      - ./src/finanbot:/usr/src/finanbot
+      - ./src/finanbot/attachments:/data/attachments
+    ports:
+      - "8000:8000"
+    command: ["uvicorn", "finanbot.main:finanbot", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: ui/Dockerfile
+    depends_on:
+      - db
+      - finanbot
+    volumes:
+      - ./ui:/usr/src/ui
+      - ./src/finanbot/attachments:/data/attachments
+    ports:
+      - "8501:8501"
+
+  rclone:
+    image: rclone/rclone:latest
+    volumes:
+      - ./src/finanbot/infra/rclone:/config/rclone:ro
+      - ./src/finanbot/infra/rclone/backups:/backups
+    entrypoint: ["sleep", "infinity"]
+    # Use this container to run manual or scheduled rclone sync jobs via `docker compose exec rclone ...`
+
+volumes:
+  db_data:

@@ -1,17 +1,19 @@
-"""Entry point for the application.
+"""Entry point for the src.finanbotlication.
 
 Initializes a `PostgresUtils` client from settings, ensures the
-`finance-tracker` schema exists, and logs available schemas and tables.
+`finanbot` schema exists, and logs available schemas and tables.
 """
 
 import logging
 import sys
 
-from app.core.config import get_settings
-from app.utils.postgres import PostgresUtils
+from core.config import get_settings
+from utils.postgres import PostgresUtils
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
+)
 
 
 def main() -> None:
@@ -21,10 +23,11 @@ def main() -> None:
     - Uses `get_settings()` to obtain Postgres connection configuration.
     - Creates `PostgresUtils` and exercises its methods:
       - `test_connection()`
-      - `create_schema_if_not_exists("finance-tracker")`
+      - `create_schema_if_not_exists("finanbot")`
       - `list_schemas()`
-      - `list_tables("finance-tracker")`
-    - Logs results and attempts to gracefully close the DB client if it exposes a `close()` method.
+      - `list_tables("finanbot")`
+    - Logs results and attempts to gracefully close the DB client if it exposes
+    a `close()` method.
     """
     settings = get_settings()
 
@@ -34,18 +37,18 @@ def main() -> None:
         user=settings.postgres_user,
         password=settings.postgres_password,
         database=settings.postgres_db,
-        schema="finance-tracker",
+        schema="finanbot",
     )
 
     try:
         db.test_connection()
-        db.create_schema_if_not_exists("finance-tracker")
+        db.create_schema_if_not_exists("finanbot")
 
         schemas = db.list_schemas()
-        tables = db.list_tables("finance-tracker")
+        tables = db.list_tables("finanbot")
 
         logger.info("Available schemas: %s", schemas)
-        logger.info("Tables in schema 'finance-tracker': %s", tables)
+        logger.info("Tables in schema 'finanbot': %s", tables)
     except Exception:
         logger.exception("An error occurred while interacting with the database")
         raise
@@ -62,5 +65,5 @@ if __name__ == "__main__":
     try:
         main()
     except Exception:
-        logger.exception("Application terminated with an error")
+        logger.exception("src.finanbotlication terminated with an error")
         sys.exit(1)
