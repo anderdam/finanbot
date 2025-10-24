@@ -57,9 +57,7 @@ class PostgresUtils:
     def save_dataframe(self, df: pd.DataFrame, table_name: str):
         try:
             with self.engine.connect() as connection:
-                df.to_sql(
-                    table_name, connection, if_exists="src.finanbotend", index=False
-                )
+                df.to_sql(table_name, connection, if_exists="append", index=False)
             logging.info(
                 f"✅ Dados salvos na tabela '{table_name}' no schema '{self.schema}'."
             )
@@ -121,7 +119,7 @@ if __name__ == "__main__":
         user=settings.postgres_user,
         password=settings.postgres_password,
         database=settings.postgres_db,
-        schema="finance-tracker",  # or settings.schema if you add it
+        schema="finance",  # or settings.schema if you add it
     )
 
     db.test_connection()

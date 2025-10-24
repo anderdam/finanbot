@@ -3,9 +3,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from src.finanbot.db import crud
-from src.finanbot.db.session import get_db
-from src.finanbot.models.schemas import (
+from db import crud
+from db.session import get_db
+from models.schemas import (
     TransactionCreate,
     TransactionRead,
     TransactionUpdate,

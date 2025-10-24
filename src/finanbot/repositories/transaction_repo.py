@@ -10,9 +10,9 @@ from uuid import UUID
 from fastapi import UploadFile
 from sqlalchemy.orm import Session
 
-from src.finanbot.attachments import storage
-from src.finanbot.db import crud
-from src.finanbot.models.schemas import TransactionCreate, TransactionUpdate
+from attachments import storage
+from db import crud
+from models.schemas import TransactionCreate, TransactionUpdate
 
 
 def create_transaction_with_attachment(

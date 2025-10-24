@@ -1,3 +1,3 @@
-from src.finanbot.models.orm_models import Base
+from models.orm_models import Base
 
 __all__ = ["Base"]

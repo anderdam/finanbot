@@ -1,14 +1,14 @@
 """Entry point for the src.finanbotlication.
 
 Initializes a `PostgresUtils` client from settings, ensures the
-`finance-tracker` schema exists, and logs available schemas and tables.
+`finanbot` schema exists, and logs available schemas and tables.
 """
 
 import logging
 import sys
 
-from src.finanbot.core.config import get_settings
-from src.finanbot.utils.postgres import PostgresUtils
+from core.config import get_settings
+from utils.postgres import PostgresUtils
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -23,9 +23,9 @@ def main() -> None:
     - Uses `get_settings()` to obtain Postgres connection configuration.
     - Creates `PostgresUtils` and exercises its methods:
       - `test_connection()`
-      - `create_schema_if_not_exists("finance-tracker")`
+      - `create_schema_if_not_exists("finanbot")`
       - `list_schemas()`
-      - `list_tables("finance-tracker")`
+      - `list_tables("finanbot")`
     - Logs results and attempts to gracefully close the DB client if it exposes
     a `close()` method.
     """
@@ -37,18 +37,18 @@ def main() -> None:
         user=settings.postgres_user,
         password=settings.postgres_password,
         database=settings.postgres_db,
-        schema="finance-tracker",
+        schema="finanbot",
     )
 
     try:
         db.test_connection()
-        db.create_schema_if_not_exists("finance-tracker")
+        db.create_schema_if_not_exists("finanbot")
 
         schemas = db.list_schemas()
-        tables = db.list_tables("finance-tracker")
+        tables = db.list_tables("finanbot")
 
         logger.info("Available schemas: %s", schemas)
-        logger.info("Tables in schema 'finance-tracker': %s", tables)
+        logger.info("Tables in schema 'finanbot': %s", tables)
     except Exception:
         logger.exception("An error occurred while interacting with the database")
         raise
