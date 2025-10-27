@@ -1,0 +1,13 @@
+# Normalize text files to LF in repository
+* text=auto eol=lf
+
+# Ensure shell scripts are treated as text and keep LF
+*.sh text eol=lf
+
+# SQL, YAML, TOML, Markdown, Python, etc.
+*.py text eol=lf
+*.sql text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.toml text eol=lf
+*.md text eol=lf

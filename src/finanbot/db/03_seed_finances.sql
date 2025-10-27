@@ -1,5 +1,8 @@
--- Insert a default user
-INSERT INTO users (id, username, email, display_name)
+-- Optional seeds (idempotent where possible). 
+-- Run separately after schema is present.
+
+-- Insert a default user (users_id matches schema)
+INSERT INTO finances.users (users_id, username, email, display_name)
 VALUES (
     '00000000-0000-0000-0000-000000000001',
     'localuser',
@@ -8,8 +11,10 @@ VALUES (
 )
 ON CONFLICT (username) DO NOTHING;
 
--- Accounts
-INSERT INTO accounts (id, user_id, name, type, currency, balance)
+-- Accounts (use accounts_id for PK, user_id as FK referencing users.users_id)
+INSERT INTO finances.accounts (
+    accounts_id, user_id, acc_name, acc_type, currency, balance
+)
 VALUES
 (
     '10000000-0000-0000-0000-000000000001',
@@ -27,10 +32,10 @@ VALUES
     'BRL',
     1500.00
 )
-ON CONFLICT DO NOTHING;
+ON CONFLICT (user_id, acc_name) DO NOTHING;
 
 -- Categories
-INSERT INTO categories (id, user_id, name, kind, color)
+INSERT INTO finances.categories (categories_id, user_id, cat_name, kind, color)
 VALUES
 (
     '20000000-0000-0000-0000-000000000001',
@@ -46,18 +51,18 @@ VALUES
     'income',
     '#33FF57'
 )
-ON CONFLICT DO NOTHING;
+ON CONFLICT (user_id, cat_name, kind) DO NOTHING;
 
 -- Sample transactions
-INSERT INTO transactions (
-    id,
+INSERT INTO finances.transactions (
+    transactions_id,
     user_id,
     account_id,
     category_id,
     occurred_at,
     amount,
     currency,
-    type,
+    tra_type,
     notes
 )
 VALUES

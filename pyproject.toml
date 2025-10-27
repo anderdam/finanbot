@@ -36,7 +36,6 @@ dependencies = [
 	"sqlalchemy>=2.0.44",
 	"streamlit>=1.50.0",
 	"uvicorn>=0.37.0",
-	"mypy>=1.18.2",
 	"bandit>=1.8.6",
 	"black>=25.9.0",
 	"httpx>=0.28.1",
@@ -59,12 +58,12 @@ Source = "https://github.com/anderdam/finanbot"
 path = "src/finanbot/__about__.py"
 
 [tool.hatch.envs.dev.scripts]
-precheck = "pre-commit run --all-files"
-start = "uvicorn finanbot.main:app --reload"
-ui = "streamlit run ui/streamlit_app.py"
+pcr = "pre-commit run --all-files"
+startapp = "uvicorn finanbot.main:app --reload"
+startui = "streamlit run ui/streamlit_app.py"
+aleup = "alembic upgrade head"
 lint = "ruff src tests"
 format = "black src tests"
-typecheck = "mypy src tests"
 test = "pytest"
 
 [tool.coverage.run]
