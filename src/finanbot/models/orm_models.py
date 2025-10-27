@@ -61,7 +61,9 @@ class User(Base):
 
 class Account(Base):
     __tablename__ = "accounts"
-    __table_args__ = (UniqueConstraint("user_id", "name", name="uq_user_account_name"),)
+    __table_args__ = (
+        UniqueConstraint("user_id", "acc_name", name="uq_user_account_name"),
+    )
 
     id: Mapped[UUID] = mapped_column("accounts_id", primary_key=True)
     user_id: Mapped[UUID] = mapped_column(

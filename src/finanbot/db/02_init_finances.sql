@@ -1,6 +1,6 @@
--- Idempotent schema + tables for 'finances' schema
--- Must be executed as the application DB user
---    (wrapper above runs it as $POSTGRES_USER)
+-- Idempotent schema + canonical tables for 'finances' schema
+-- Designed to be executed as the application DB user
+--(wrapper runs it as $POSTGRES_USER)
 
 CREATE SCHEMA IF NOT EXISTS finances AUTHORIZATION current_user;
 
@@ -12,7 +12,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Users (users_id, username, email, display_name)
+-- users (primary key column follows pattern: users_id)
 CREATE TABLE IF NOT EXISTS finances.users (
     users_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     username TEXT UNIQUE NOT NULL,
@@ -25,7 +25,8 @@ CREATE TABLE IF NOT EXISTS finances.users (
 DO $$
 BEGIN
   IF NOT EXISTS (
-    SELECT 1 FROM pg_trigger WHERE tgname = 'trg_users_set_timestamp' AND tgrelid = 'finances.users'::regclass
+    SELECT 1 FROM pg_trigger WHERE tgname = 'trg_users_set_timestamp'
+        AND tgrelid = 'finances.users'::regclass
   ) THEN
     CREATE TRIGGER trg_users_set_timestamp
     BEFORE UPDATE ON finances.users
@@ -34,7 +35,7 @@ BEGIN
 END;
 $$;
 
--- Accounts
+-- accounts (accounts_id and acc_name/acc_type)
 CREATE TABLE IF NOT EXISTS finances.accounts (
     accounts_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES finances.users (
@@ -49,6 +50,9 @@ CREATE TABLE IF NOT EXISTS finances.accounts (
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
+ALTER TABLE finances.accounts
+ADD CONSTRAINT uq_finances_accounts_user_acc_name UNIQUE (user_id, acc_name);
+
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -61,7 +65,7 @@ BEGIN
 END;
 $$;
 
--- Categories (categories_id, user_id, cat_name, kind, parent_id, color)
+-- categories (categories_id and cat_name)
 CREATE TABLE IF NOT EXISTS finances.categories (
     categories_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES finances.users (
@@ -100,7 +104,7 @@ BEGIN
 END;
 $$;
 
--- Transactions
+-- transactions (transactions_id and tra_type)
 CREATE TABLE IF NOT EXISTS finances.transactions (
     transactions_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES finances.users (
@@ -114,8 +118,10 @@ CREATE TABLE IF NOT EXISTS finances.transactions (
     ) ON DELETE SET NULL,
     occurred_at TIMESTAMP WITH TIME ZONE NOT NULL,
     amount NUMERIC(18, 2) NOT NULL,
-    currency CHAR(3) NOT NULL DEFAULT 'USD' CHECK (currency ~ '^[A-Z]{3}$'),
-    tra_type TEXT NOT NULL CHECK (type IN ('expense', 'income', 'transfer')),
+    currency CHAR(3) NOT NULL DEFAULT 'BRL' CHECK (currency ~ '^[A-Z]{3}$'),
+    tra_type TEXT NOT NULL CHECK (
+        tra_type IN ('expense', 'income', 'transfer')
+    ),
     notes TEXT,
     attachment_path TEXT,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
@@ -134,7 +140,7 @@ BEGIN
 END;
 $$;
 
--- Settings (settings_id, user_id, set_key, set_value)
+-- settings (settings_id, set_key/set_value)
 CREATE TABLE IF NOT EXISTS finances.settings (
     settings_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES finances.users (
@@ -171,7 +177,7 @@ CREATE INDEX IF NOT EXISTS idx_transactions_category ON finances.transactions (
     category_id
 );
 
--- Grants for current user
+-- Grants for the current DB user (the wrapper runs as $POSTGRES_USER)
 REVOKE ALL ON SCHEMA finances FROM public;
 GRANT USAGE, CREATE ON SCHEMA finances TO current_user;
 
@@ -179,11 +185,11 @@ GRANT ALL ON ALL TABLES IN SCHEMA finances TO current_user;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA finances TO current_user;
 GRANT ALL ON ALL FUNCTIONS IN SCHEMA finances TO current_user;
 
-ALTER DEFAULT PRIVILEGES IN
-SCHEMA finances GRANT ALL ON TABLES TO current_user;
-ALTER DEFAULT PRIVILEGES IN
-SCHEMA finances GRANT ALL ON SEQUENCES TO current_user;
-ALTER DEFAULT PRIVILEGES IN
-SCHEMA finances GRANT ALL ON FUNCTIONS TO current_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA finances
+GRANT ALL ON TABLES TO current_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA finances
+GRANT ALL ON SEQUENCES TO current_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA finances
+GRANT ALL ON FUNCTIONS TO current_user;
 
 ALTER SCHEMA finances OWNER TO current_user;

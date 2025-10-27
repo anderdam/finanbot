@@ -1,4 +1,4 @@
-﻿exclude: |
+exclude: |
   (?x)^(
       .*\{\{.*\}\}.*|     # Exclude any files with cookiecutter variables
       docs/site/.*|       # Exclude mkdocs compiled files
@@ -78,12 +78,12 @@ repos:
         name: "sql - Attempts to fix rule violations"
         args: ["--dialect", "postgres"]
 
-  - repo: https://github.com/shssoichiro/oxipng
-    rev: v9.1.5
-    hooks:
-      - id: oxipng
-        name: "images - Optimize PNG files"
-        args: ["-o", "4", "--strip", "safe", "--alpha"]
+  # - repo: https://github.com/shssoichiro/oxipng
+  #   rev: v9.1.5
+  #   hooks:
+  #     - id: oxipng
+  #       name: "images - Optimize PNG files"
+  #       args: ["-o", "4", "--strip", "safe", "--alpha"]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0

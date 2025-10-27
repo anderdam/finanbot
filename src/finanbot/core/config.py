@@ -25,9 +25,9 @@ class Settings(BaseSettings):
     backup_dir: Path = Field(Path("/data/backups"), env="BACKUP_DIR")
 
     # Optional DB schema name
-    schema: Optional[str] = Field(None, env="DB_SCHEMA")
+    tbl_schema: Optional[str] = Field(None, env="DB_SCHEMA")
 
-    # read .env and ignore unknown keys
+    # read .env and ignore unknown keys (Pydantic v2)
     model_config = ConfigDict(env_file=".env", extra="ignore")
 
     @field_validator("postgres_port")
@@ -60,9 +60,6 @@ class Settings(BaseSettings):
     def attachments_path(self) -> Path:
         """Resolved Path for attachments_dir (expanduser + resolve)."""
         return self.attachments_dir.expanduser().resolve()
-
-    class Config:  # type: ignore
-        env_file = ".env"
 
 
 @lru_cache()

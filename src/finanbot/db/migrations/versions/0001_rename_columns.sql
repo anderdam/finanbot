@@ -3,7 +3,7 @@
 -- It will rename legacy columns if present.
 DO $$
 BEGIN
-  -- users.id -> users_id
+  -- users.users_id -> users_id
   IF EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_schema = 'finances' AND table_name = 'users' AND column_name = 'id'
@@ -11,7 +11,7 @@ BEGIN
     EXECUTE 'ALTER TABLE finances.users RENAME COLUMN id TO users_id';
   END IF;
 
-  -- accounts.id -> accounts_id ; accounts.name -> acc_name ; accounts.type -> acc_type
+  -- accounts.accounts_id -> accounts_id ; accounts.acc_name -> acc_name ; accounts.acc_type -> acc_type
   IF EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_schema = 'finances' AND table_name = 'accounts' AND column_name = 'id'
@@ -31,7 +31,7 @@ BEGIN
     EXECUTE 'ALTER TABLE finances.accounts RENAME COLUMN type TO acc_type';
   END IF;
 
-  -- categories.id -> categories_id ; categories.name -> cat_name
+  -- categories.categories_id -> categories_id ; categories.cat_name -> cat_name
   IF EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_schema = 'finances' AND table_name = 'categories' AND column_name = 'id'
@@ -45,7 +45,7 @@ BEGIN
     EXECUTE 'ALTER TABLE finances.categories RENAME COLUMN name TO cat_name';
   END IF;
 
-  -- transactions.id -> transactions_id ; transactions.type -> tra_type
+  -- transactions.transactions_id -> transactions_id ; transactions.tra_type -> tra_type
   IF EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_schema = 'finances' AND table_name = 'transactions' AND column_name = 'id'
@@ -59,7 +59,7 @@ BEGIN
     EXECUTE 'ALTER TABLE finances.transactions RENAME COLUMN type TO tra_type';
   END IF;
 
-  -- settings.id -> settings_id ; settings.key -> set_key ; settings.value -> set_value
+  -- settings.settings_id -> settings_id ; settings.set_key -> set_key ; settings.set_value -> set_value
   IF EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_schema = 'finances' AND table_name = 'settings' AND column_name = 'id'
