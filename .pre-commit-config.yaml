@@ -33,7 +33,7 @@ repos:
         language_version: python3.13
 
   - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.406
+    rev: v1.1.407
     hooks:
       - id: pyright
         name: "python - Check types"

@@ -4,8 +4,7 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import jwt
-from jose.exceptions import JWTError
+from jose import jwt, JWTError
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
@@ -13,6 +12,7 @@ from src.finanbot.models.orm_models import User
 from src.finanbot.core.config import get_settings
 
 settings = get_settings()
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 
@@ -26,20 +26,12 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
-    """
-    Create a JWT token with provided payload.
-    Caller should include 'sub' when appropriate.
-    Uses UTC times for expiry.
-    """
-    to_encode = data.copy()
     expire = datetime.utcnow() + (
         expires_delta or timedelta(minutes=settings.access_token_expires_minutes)
     )
+    to_encode = data.copy()
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(
-        to_encode, settings.secret_key, algorithm=settings.jwt_algorithm
-    )
-    return encoded_jwt
+    return jwt.encode(to_encode, settings.secret_key, algorithm=settings.jwt_algorithm)
 
 
 def create_access_token_for_user(
@@ -47,9 +39,6 @@ def create_access_token_for_user(
     extra_claims: Optional[dict] = None,
     expires: Optional[timedelta] = None,
 ) -> str:
-    """
-    Convenience: creates a token with subject ('sub') set to the user id string.
-    """
     payload = {"sub": str(user_id)}
     if extra_claims:
         payload.update(extra_claims)
@@ -64,36 +53,25 @@ def _credentials_exception() -> HTTPException:
     )
 
 
-def get_current_user(
-    token: str,
-    db: Session,
-) -> User:
-    """
-    Resolve the current user from the bearer token.
-    Raises 401 on any validation error.
-    """
-    credentials_exception = _credentials_exception()
-
+def get_current_user(token: str, db: Session) -> User:
     try:
         payload = jwt.decode(
             token, settings.secret_key, algorithms=[settings.jwt_algorithm]
         )
     except JWTError as err:
-        # Chain from the original JWTError so it's clear why validation failed
-        raise credentials_exception from err
+        raise _credentials_exception() from err
 
     user_id: Optional[str] = payload.get("sub")
     if not user_id:
-        raise credentials_exception
+        raise _credentials_exception()
 
     try:
         user_uuid = UUID(user_id)
     except (ValueError, TypeError) as err:
-        # Chain the parsing error to preserve original cause while raising a 401
-        raise credentials_exception from err
+        raise _credentials_exception() from err
 
     user = db.get(User, user_uuid)
     if user is None:
-        raise credentials_exception
+        raise _credentials_exception()
 
     return user

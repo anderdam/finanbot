@@ -48,11 +48,11 @@ class PostgresUtils:
                 # ⚠️ Interpolação direta — certifique-se que schema_name é seguro
                 connection.execute(
                     text("CREATE SCHEMA IF NOT EXISTS :schema_name;"),
-                    {"schema_name": schema_name},
+                    {"schema_name": "finances"},
                 )
-            logging.info(f"✅ Schema '{schema_name}' garantido no banco.")
+            logging.info(f"✅ Schema {schema_name} garantido no banco.")
         except SQLAlchemyError as e:
-            logging.error(f"❌ Erro ao criar schema '{schema_name}': {e}")
+            logging.error(f"❌ Erro ao criar schema {schema_name}: {e}")
 
     def save_dataframe(self, df: pd.DataFrame, table_name: str):
         try:
@@ -81,6 +81,7 @@ class PostgresUtils:
                     text("SELECT schema_name FROM information_schema.schemata;")
                 )
                 schemas = [row[0] for row in result]
+                schemas.remove("public")
             logging.info("✅ Schemas listados com sucesso.")
             return schemas
         except SQLAlchemyError as e:
@@ -119,7 +120,7 @@ if __name__ == "__main__":
         user=settings.postgres_user,
         password=settings.postgres_password,
         database=settings.postgres_db,
-        schema="finance",  # or settings.schema if you add it
+        schema="finances",  # or settings.schema if you add it
     )
 
     db.test_connection()

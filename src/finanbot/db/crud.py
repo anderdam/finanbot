@@ -1,11 +1,12 @@
 from typing import Any, Sequence
+from datetime import datetime, timedelta
 from uuid import UUID
-
-from sqlalchemy import delete, insert, select, update
+from sqlalchemy import func, delete, insert, select, update
 from sqlalchemy.orm import Session
 
-from models.orm_models import Transaction as TransactionModel
-from models.schemas import TransactionCreate
+from src.finanbot.models.orm_models import Transaction as TransactionModel, Attachment
+from src.finanbot.models.schemas import TransactionCreate
+from fastapi import UploadFile
 
 
 def create_transaction(
@@ -72,3 +73,136 @@ def delete_transaction(db: Session, tx_id: UUID) -> TransactionModel | None:
     result = db.execute(stmt)
     db.commit()
     return result.scalar_one_or_none()
+
+
+def list_transactions_with_count(
+    db: Session,
+    user_id: UUID,
+    limit: int,
+    offset: int,
+    filters: dict[str, Any],
+) -> tuple[Sequence[TransactionModel], int]:
+    query = db.query(TransactionModel).filter(TransactionModel.user_id == user_id)
+
+    if filters.get("start_date"):
+        query = query.filter(TransactionModel.occurred_at >= filters["start_date"])
+    if filters.get("end_date"):
+        query = query.filter(TransactionModel.occurred_at <= filters["end_date"])
+    if filters.get("category"):
+        query = query.filter(TransactionModel.category_id == filters["category"])
+    if filters.get("min_amount"):
+        query = query.filter(TransactionModel.amount >= filters["min_amount"])
+    if filters.get("max_amount"):
+        query = query.filter(TransactionModel.amount <= filters["max_amount"])
+
+    total = query.count()
+    transactions = (
+        query.order_by(TransactionModel.occurred_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+    return transactions, total
+
+
+def get_monthly_summary(
+    db: Session, user_id: UUID, year: int, month: int
+) -> dict[str, Any]:
+    base_query = db.query(TransactionModel).filter(
+        TransactionModel.user_id == user_id,
+        func.extract("year", TransactionModel.occurred_at) == year,
+        func.extract("month", TransactionModel.occurred_at) == month,
+    )
+
+    income = (
+        base_query.filter(TransactionModel.amount > 0)
+        .with_entities(func.sum(TransactionModel.amount))
+        .scalar()
+        or 0
+    )
+
+    expense = (
+        base_query.filter(TransactionModel.amount < 0)
+        .with_entities(func.sum(TransactionModel.amount))
+        .scalar()
+        or 0
+    )
+
+    category_totals = (
+        base_query.with_entities(
+            TransactionModel.category_id, func.sum(TransactionModel.amount)
+        )
+        .group_by(TransactionModel.category_id)
+        .all()
+    )
+
+    top_categories = {
+        str(category_id): float(total) for category_id, total in category_totals
+    }
+
+    return {
+        "year": year,
+        "month": month,
+        "total_income": float(income),
+        "total_expense": abs(float(expense)),
+        "net_balance": float(income + expense),
+        "top_categories": top_categories,
+    }
+
+
+def generate_alerts(db: Session, user_id: UUID) -> dict:
+    today = datetime.today()
+    start_date = today - timedelta(days=30)
+
+    txs = (
+        db.query(TransactionModel)
+        .filter(
+            TransactionModel.user_id == user_id,
+            TransactionModel.occurred_at >= start_date,
+        )
+        .all()
+    )
+
+    income = sum(tx.amount for tx in txs if tx.amount > 0)
+    expense = sum(tx.amount for tx in txs if tx.amount < 0)
+    net = income + expense
+
+    messages = []
+    risk_score = 0.0
+
+    if income == 0:
+        messages.append("No income recorded in the last 30 days.")
+        risk_score += 0.5
+
+    if abs(expense) > income:
+        messages.append("You’re spending more than you earn.")
+        risk_score += 0.4
+
+    if net < 0:
+        messages.append("Your net balance is negative this month.")
+        risk_score += 0.3
+
+    if len(txs) > 20:
+        messages.append(
+            "High transaction volume — consider reviewing discretionary expenses."
+        )
+        risk_score += 0.2
+
+    risk_score = min(risk_score, 1.0)
+
+    return {
+        "risk_score": round(risk_score, 2),
+        "messages": messages or ["No alerts. You're on track!"],
+    }
+
+
+def record_attachment_metadata(db, tx_id, file: UploadFile):
+    attachment = Attachment(
+        tx_id=tx_id,
+        filename=file.filename,
+        content_type=file.content_type,
+    )
+    db.add(attachment)
+    db.commit()
+    db.refresh(attachment)
+    return attachment

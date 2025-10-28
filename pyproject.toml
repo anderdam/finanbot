@@ -36,6 +36,7 @@ dependencies = [
 	"sqlalchemy>=2.0.44",
 	"streamlit>=1.50.0",
 	"uvicorn>=0.37.0",
+	"python-multipart>=0.0.20",
 	"bandit>=1.8.6",
 	"black>=25.9.0",
 	"httpx>=0.28.1",
@@ -88,6 +89,7 @@ target-version = ["py313"]
 [tool.ruff]
 line-length = 88
 lint.select = ["E", "F", "B"]
+lint.ignore = ["B008"]
 exclude = ["tests"]
 target-version = "py313"
 
@@ -113,7 +115,7 @@ ignore = ["src/oldstuff"]
 defineConstant = { DEBUG = true }
 stubPath = "src/stubs"
 
-reportMissingImports = "error"
+reportMissingImports = false
 reportMissingTypeStubs = false
 
 pythonVersion = "3.13"

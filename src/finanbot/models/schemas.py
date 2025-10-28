@@ -1,8 +1,7 @@
-from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from uuid import UUID
-
 from pydantic import BaseModel, ConfigDict
+from datetime import datetime
 
 
 class TransactionCreate(BaseModel):
@@ -40,3 +39,32 @@ class TransactionUpdate(BaseModel):
     type: Optional[str] = None
     notes: Optional[str] = None
     attachment_path: Optional[str] = None
+
+
+class PaginatedTransactions(BaseModel):
+    total: int
+    limit: int
+    offset: int
+    items: List[TransactionRead]
+
+
+class TransactionSummary(BaseModel):
+    year: int
+    month: int
+    total_income: float
+    total_expense: float
+    net_balance: float
+    top_categories: dict[str, float]  # e.g., {"Food": 120.50, "Transport": 80.00}
+
+
+class AlertSummary(BaseModel):
+    risk_score: float  # 0.0 to 1.0
+    messages: List[str]
+
+
+class AttachmentRead(BaseModel):
+    id: UUID
+    tx_id: UUID
+    filename: str
+    content_type: str
+    uploaded_at: datetime

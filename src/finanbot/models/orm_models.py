@@ -1,6 +1,8 @@
 from datetime import datetime
 from enum import Enum
-from uuid import UUID
+from uuid import UUID, uuid4
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+
 
 from sqlalchemy import (
     JSON,
@@ -11,6 +13,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     func,
+    Column,
 )
 from sqlalchemy.dialects.postgresql import CHAR
 from sqlalchemy.orm import (
@@ -177,3 +180,13 @@ class Setting(Base):
     )
 
     user: Mapped["User"] = relationship(back_populates="settings")
+
+
+class Attachment(Base):
+    __tablename__ = "attachments"
+
+    id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
+    tx_id = Column(PG_UUID, ForeignKey("transactions.id"), nullable=False)
+    filename = Column(String, nullable=False)
+    content_type = Column(String, nullable=False)
+    uploaded_at = Column(DateTime, default=datetime.now)
