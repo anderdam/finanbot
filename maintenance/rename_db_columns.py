@@ -41,7 +41,7 @@ REPLACEMENTS = {
 }
 
 # File globs to update
-SOURCE_DIRS = ["src", "tests", "ui", "src/finanbot/db"]
+SOURCE_DIRS = ["src", "tests", "ui", "src/db"]
 
 
 def replace_in_file(path: Path, patterns):

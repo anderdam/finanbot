@@ -1,0 +1,5 @@
+# Run hourly at minute 0 (root)
+0 * * * * root /usr/local/bin/python /app/scripts/example_hourly_job.py >> /var/log/cron.log 2>&1
+
+# Run a quick job at container startup (run once)
+@reboot root sleep 10 && /usr/local/bin/python /app/scripts/on_startup_job.py >> /var/log/cron.log 2>&1

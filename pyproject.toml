@@ -25,29 +25,31 @@ classifiers = [
 dependencies = [
 	"alembic>=1.17.0",
 	"asyncpg>=0.30.0",
-	"fastapi>=0.119.0",
-	"pandas>=2.3.3",
-	"psycopg2-binary>=2.9.11",
-	"pydantic>=2.12.2",
-	"pydantic-settings>=2.11.0",
-	"python-dotenv>=1.1.1",
-	"requests>=2.32.5",
-	"richer>=0.1.6",
-	"sqlalchemy>=2.0.44",
-	"streamlit>=1.50.0",
-	"uvicorn>=0.37.0",
-	"python-multipart>=0.0.20",
 	"bandit>=1.8.6",
 	"black>=25.9.0",
+	"commitizen>=4.9.1",
+	"fastapi>=0.119.0",
 	"httpx>=0.28.1",
 	"isort>=7.0.0",
-	"pre-commit>=4.3.0",
-	"pytest>=8.4.2",
-	"pytest-asyncio>=1.2.0",
-	"ruff>=0.14.0",
-	"python-jose>=3.5.0",
+	"pandas>=2.3.3",
 	"passlib>=1.7.4",
-	"commitizen>=4.9.1"
+	"pre-commit>=4.3.0",
+	"psycopg2-binary>=2.9.11",
+	"pydantic-settings>=2.11.0",
+	"pydantic>=2.12.2",
+    "pydantic[email]",
+	"pytest-asyncio>=1.2.0",
+	"pytest>=8.4.2",
+	"python-dotenv>=1.1.1",
+	"python-jose>=3.5.0",
+	"python-multipart>=0.0.20",
+	"rclone_python>=0.1.23",
+	"requests>=2.32.5",
+	"richer>=0.1.6",
+	"ruff>=0.14.0",
+	"sqlalchemy>=2.0.44",
+	"streamlit>=1.50.0",
+	"uvicorn>=0.37.0"
 ]
 
 [project.urls]
@@ -56,11 +58,11 @@ Issues = "https://github.com/anderdam/finanbot/issues"
 Source = "https://github.com/anderdam/finanbot"
 
 [tool.hatch.version]
-path = "src/finanbot/__about__.py"
+path = "src/__about__.py"
 
 [tool.hatch.envs.dev.scripts]
 pcr = "pre-commit run --all-files"
-startapp = "uvicorn finanbot.main:app --reload"
+startapp = "uvicorn src.main:app --reload"
 startui = "streamlit run ui/streamlit_app.py"
 aleup = "alembic upgrade head"
 lint = "ruff src tests"
@@ -68,13 +70,13 @@ format = "black src tests"
 test = "pytest"
 
 [tool.coverage.run]
-source_pkgs = ["finanbot", "tests"]
+source_pkgs = ["src", "tests"]
 branch = true
 parallel = true
-omit = ["src/finanbot/__about__.py"]
+omit = ["src/__about__.py"]
 
 [tool.coverage.paths]
-finanbot = ["src/finanbot", "*/finanbot/src/finanbot"]
+finanbot = ["src", "*/finanbot/src"]
 tests = ["tests", "*/finanbot/tests"]
 
 [tool.commitizen]
@@ -122,7 +124,7 @@ pythonVersion = "3.13"
 pythonPlatform = "Windows"
 
 executionEnvironments = [
-  { root = "src/finanbot", pythonVersion = "3.13", pythonPlatform = "Windows", extraPaths = [ "src/service_libs" ], reportMissingImports = "warning" },
+  { root = "src", pythonVersion = "3.13", pythonPlatform = "Windows", extraPaths = [ "src/service_libs" ], reportMissingImports = "warning" },
   { root = "tests", extraPaths = ["tests/"]},
   { root = "src" }
 ]

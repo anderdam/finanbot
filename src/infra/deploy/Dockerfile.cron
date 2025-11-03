@@ -1,0 +1,33 @@
+# Cron runner image with timezone configured
+ARG BASE_IMAGE=python:3.13-slim
+FROM ${BASE_IMAGE}
+
+ARG TZ=America/Sao_Paulo
+ENV TZ=${TZ}
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install cron, tzdata and curl
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends cron tzdata curl \
+ && ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime \
+ && echo "${TZ}" > /etc/timezone \
+ && dpkg-reconfigure -f noninteractive tzdata \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy default crontab; Compose can mount an overriding crontab at runtime
+COPY infra/cron/finanbot-crontab /etc/cron.d/finanbot-cron
+RUN chmod 0644 /etc/cron.d/finanbot-cron && crontab /etc/cron.d/finanbot-cron
+
+# Copy scripts into image (mounts from Compose will override)
+COPY scripts/ /app/scripts/
+RUN chmod +x /app/scripts/*.py || true
+
+# Ensure cron logs file exists so Docker captures logs
+RUN touch /var/log/cron.log
+
+ENV PATH="/usr/local/bin:${PATH}"
+ENV PYTHONUNBUFFERED=1
+
+CMD ["cron", "-f"]

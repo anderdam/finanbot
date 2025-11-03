@@ -26,6 +26,8 @@ env/
 __pypackages__/
 .hatch/
 .hatchling/
+infra/deploy/.env
+
 
 # Editor / IDE
 .vscode/
@@ -58,7 +60,7 @@ htmlcov/
 *.orig
 
 # Streamlit
-.streamlit/
+#.streamlit/
 
 # Databases
 *.sqlite

@@ -1,0 +1,36 @@
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.env
+.env.*
+
+# Git and version control
+.git/
+.gitignore
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Tests and docs
+tests/
+docs/
+
+# UI (if not needed in backend image)
+ui/
+
+# Logs and temp files
+*.log
+*.tmp
+*.bak
+
+# Docker files not needed inside image
+infra/deploy/docker-compose.yml
+infra/deploy/Dockerfile.frontend

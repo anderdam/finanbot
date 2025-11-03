@@ -1,0 +1,45 @@
+﻿# infra/deploy/Dockerfile.backend
+ARG BASE_IMAGE=python:3.13-slim
+FROM ${BASE_IMAGE} AS base
+
+# build-time timezone arg (default Sao Paulo)
+ARG TZ=America/Sao_Paulo
+ENV TZ=${TZ}
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install tzdata and runtime packages
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends tzdata ca-certificates gcc libpq-dev build-essential \
+ && ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime \
+ && echo "${TZ}" > /etc/timezone \
+ && dpkg-reconfigure -f noninteractive tzdata \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy application sources
+# Adjust these COPY lines to match your repo layout if different
+COPY src/ /app/src/
+COPY pyproject.toml /app/pyproject.toml
+COPY requirements.txt /app/requirements.txt
+
+# Install Python dependencies
+RUN pip install --upgrade pip
+# If you have requirements.txt
+RUN if [ -f /app/requirements.txt ]; then pip install --no-cache-dir -r /app/requirements.txt; fi
+# If using pyproject/poetry, adapt installation here instead
+
+# Copy entrypoint / startup script and make executable
+COPY src/infra/scripts/ensure_env_and_start.py /usr/local/bin/ensure_env_and_start.py
+RUN chmod +x /usr/local/bin/ensure_env_and_start.py
+
+# Ensure attachments dir exists in image and is writable
+ENV ATTACHMENTS_DIR=/data/attachments
+RUN mkdir -p ${ATTACHMENTS_DIR} && chmod 755 ${ATTACHMENTS_DIR}
+
+# Expose typical app port
+EXPOSE 8000
+
+# Use the startup script as entrypoint so compose can pass uvicorn args
+ENTRYPOINT ["/usr/local/bin/ensure_env_and_start.py"]
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]

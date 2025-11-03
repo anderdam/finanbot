@@ -1,43 +1,35 @@
+# streamlit_app.py (main dashboard + simple nav if not using multipage)
+import os
 import streamlit as st
-import requests
-from datetime import datetime
+from pages.dashboard import show_dashboard
+from pages.transactions import show_add_transaction, show_list_transactions
+from pages.users import show_add_user, show_list_users
+from pages.attachments import show_upload_attachment
 
-
-API_BASE = "http://localhost:8000"  # Adjust if running elsewhere
-
+API_BASE = os.getenv("FINANBOT_BACKEND_URL", "http://finanbot:8000").rstrip("/") + "/v1"
 st.set_page_config(page_title="FinanBot Dashboard", layout="wide")
 
-st.title("📊 FinanBot Personal Finance Tracker")
-
-# --- Date Selection ---
-st.sidebar.header("Select Month")
-year = st.sidebar.selectbox("Year", list(range(2022, datetime.now().year + 1)))
-month = st.sidebar.selectbox("Month", list(range(1, 13)))
-
-# --- Summary ---
-st.subheader("Monthly Summary")
-summary_url = f"{API_BASE}/transactions/summary?year={year}&month={month}"
-summary_resp = requests.get(summary_url)
-
-if summary_resp.status_code == 200:
-    summary = summary_resp.json()
-    st.metric("Total Income", f"${summary['total_income']:.2f}")
-    st.metric("Total Expense", f"${summary['total_expense']:.2f}")
-    st.metric("Net Balance", f"${summary['net_balance']:.2f}")
-
-    st.write("### Top Categories")
-    st.bar_chart(summary["top_categories"])
-else:
-    st.warning("No data available for this period.")
-
-# --- Alerts ---
-st.subheader("Alerts")
-alerts_resp = requests.get(f"{API_BASE}/transactions/alerts")
-
-if alerts_resp.status_code == 200:
-    alerts = alerts_resp.json()
-    st.progress(alerts["risk_score"])
-    for msg in alerts["messages"]:
-        st.error(msg)
-else:
-    st.warning("Could not fetch alerts.")
+st.sidebar.title("FinanBot")
+page = st.sidebar.selectbox(
+    "Go to",
+    [
+        "Dashboard",
+        "Add transaction",
+        "List transactions",
+        "Upload attachment",
+        "Add user",
+        "List users",
+    ],
+)
+if page == "Dashboard":
+    show_dashboard(API_BASE)
+elif page == "Add transaction":
+    show_add_transaction(API_BASE)
+elif page == "List transactions":
+    show_list_transactions(API_BASE)
+elif page == "Upload attachment":
+    show_upload_attachment(API_BASE)
+elif page == "Add user":
+    show_add_user(API_BASE)
+elif page == "List users":
+    show_list_users(API_BASE)
